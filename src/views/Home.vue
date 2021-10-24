@@ -95,7 +95,7 @@ export default {
           this.currencies = response.data;
           this.currency = response.data["USD"]["symbol"];
           if (document.cookie.includes("currency")) {
-            const cookiecurrency = document.cookie.split("; ")[1].split("=")[1];
+            const cookiecurrency = document.cookie.split("currency=")[1];
             this.currency = cookiecurrency;
           } else {
             document.cookie = `currency=${this.currency}; expires=Fri, 31 Dec 9999 23:59:59 GMT; SameSite=None; Secure`;
@@ -180,9 +180,11 @@ export default {
       this.showalert = true;
     },
     onChange() {
-      this.resetTimer();
-      this.calculate();
       document.cookie = `currency=${this.currency}; expires=Fri, 31 Dec 9999 23:59:59 GMT; SameSite=None; Secure`;
+      if(this.currencyval) {
+        this.resetTimer();
+        this.calculate();
+      }
     },
   },
   created() {
