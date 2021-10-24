@@ -2,10 +2,10 @@
   <div class="container d-flex align-items-center justify-content-center h-100">
     <div class="row">
       <div class="col-12">
-        <h2>Smart Coin Calculator</h2>
+        <h2>Currency to Coin Calculator</h2>
       </div>
     </div>
-    <br>
+    <br />
     <div class="row">
       <div class="col-12 col-md-7">
         <label class="form-label">Amount the Spend</label>
@@ -13,13 +13,18 @@
           <div class="input-group-prepend">
             <input
               v-model="currencyval"
-              @keyup="changeVal('currency')"
-              type="decimal"
+              @keyup="changeVal()"
+              type="number"
               class="form-control"
               placeholder="0,00"
             />
           </div>
-          <select class="form-select" name="currency" v-model="currency">
+          <select
+            class="form-select"
+            name="currency"
+            v-model="currency"
+            @change="onChange()"
+          >
             <option
               v-for="item in currencies"
               :value="item.symbol"
@@ -34,11 +39,10 @@
         <label class="form-label">Coins to Receive</label>
         <div class="input-group mb-3">
           <input
-            type="decimal"
             class="form-control"
             placeholder="0,00"
+            readonly
             v-model="coin"
-            @keyup="changeVal('coin')"
           />
           <span class="input-group-text">BTC</span>
         </div>
@@ -90,14 +94,15 @@ export default {
         .then((response) => {
           this.currencies = response.data;
           this.currency = response.data["USD"]["symbol"];
+          if (document.cookie.includes("currency")) {
+            const cookiecurrency = document.cookie.split("; ")[1].split("=")[1];
+            this.currency = cookiecurrency;
+          } else {
+            document.cookie = `currency=${this.currency}; expires=Fri, 31 Dec 9999 23:59:59 GMT; SameSite=None; Secure`;
+          }
         })
         .catch(() => {
-          this.$buefy.toast.open({
-            duration: 3000,
-            message: "Opps!",
-            position: "is-bottom",
-            type: "is-danger",
-          });
+          this.snackbar("Bir hata meydana geldi");
         });
     },
     buy() {
@@ -113,47 +118,33 @@ export default {
         this.$router.push({ path: "/result" });
       });
     },
-    changeVal(type) {
-      if (type === "coin") {
-        if (this.coin == "") {
-          this.currencyval = null;
-        } else if (this.coin == "0") {
-          this.snackbar("Please enter a correct amount");
-          this.currencyval = null;
-        }
+    changeVal() {
+      this.showalert = false;
+      this.resetTimer();
+      if (this.currencyval == "") {
+        this.coin = null;
+      } else if (this.currencyval == "0") {
+        this.snackbar("Please enter a correct amount");
+        this.coin = null;
+      } else if (this.currencyval < 30 && this.currency == "USD") {
+        this.snackbar("Min amount is 30 for USD");
+        this.coin = null;
+      } else if (this.currencyval < 25 && this.currency == "EUR") {
+        this.snackbar("Min amount is 25 for EUR");
+        this.coin = null;
+      } else if (this.currencyval < 20 && this.currency == "GBP") {
+        this.snackbar("Min amount is 20 for GBP");
+        this.coin = null;
+      } else if (
+        this.currencyval > 50000 &&
+        (this.currency == "GBP" ||
+          this.currency == "EUR" ||
+          this.currency == "USD")
+      ) {
+        this.snackbar(`Max limit is 50000 for ${this.currency}`);
+        this.coin = null;
       } else {
-        this.showalert = false;
-        if (this.currencyval == "") {
-          this.coin = null;
-          this.resetTimer();
-        } else if (this.currencyval == "0") {
-          this.snackbar("Please enter a correct amount");
-          this.coin = null;
-          this.resetTimer();
-        } else if (this.currencyval < 30 && this.currency == "USD") {
-          this.snackbar("Min amount is 30 for USD");
-          this.coin = null;
-          this.resetTimer();
-        } else if (this.currencyval < 25 && this.currency == "EUR") {
-          this.snackbar("Min amount is 25 for EUR");
-          this.coin = null;
-          this.resetTimer();
-        } else if (this.currencyval < 20 && this.currency == "GBP") {
-          this.snackbar("Min amount is 20 for GBP");
-          this.coin = null;
-          this.resetTimer();
-        } else if (
-          this.currencyval > 50000 &&
-          (this.currency == "GBP" ||
-            this.currency == "EUR" ||
-            this.currency == "USD")
-        ) {
-          this.snackbar(`Max limit is 50000 for ${this.currency}`);
-          this.coin = null;
-          this.resetTimer();
-        } else {
-          this.calculate();
-        }
+        this.calculate();
       }
     },
     resetTimer() {
@@ -184,21 +175,18 @@ export default {
       })
         .then((response) => {
           this.coin = response.data;
-          this.resetTimer();
           this.timer();
         })
         .catch(() => {
-          this.$buefy.toast.open({
-            duration: 3000,
-            message: "Opps!",
-            position: "is-bottom",
-            type: "is-danger",
-          });
+          this.snackbar("Bir hata meydana geldi");
         });
     },
     snackbar(msg) {
       this.msg = msg;
       this.showalert = true;
+    },
+    onChange() {
+      document.cookie = `currency=${this.currency}; expires=Fri, 31 Dec 9999 23:59:59 GMT; SameSite=None; Secure`;
     },
   },
   created() {
