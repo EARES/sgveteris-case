@@ -65,10 +65,8 @@
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
-import { maska } from 'maska'
 
 export default {
-  directives: { maska },
   name: "Home",
   data() {
     return {
