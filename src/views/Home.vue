@@ -101,9 +101,6 @@ export default {
             document.cookie = `currency=${this.currency}; expires=Fri, 31 Dec 9999 23:59:59 GMT; SameSite=None; Secure`;
           }
         })
-        .catch(() => {
-          this.snackbar("Bir hata meydana geldi");
-        });
     },
     buy() {
       this.resetTimer();
@@ -177,9 +174,6 @@ export default {
           this.coin = response.data;
           this.timer();
         })
-        .catch(() => {
-          this.snackbar("Bir hata meydana geldi");
-        });
     },
     snackbar(msg) {
       this.msg = msg;
