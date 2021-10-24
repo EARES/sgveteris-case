@@ -1,7 +1,13 @@
 <template>
   <div class="container d-flex align-items-center justify-content-center h-100">
     <div class="row">
-      <div class="col-7">
+      <div class="col-12">
+        <h2>Smart Coin Calculator</h2>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-12 col-md-7">
         <label class="form-label">Amount the Spend</label>
         <div class="input-group mb-3">
           <div class="input-group-prepend">
@@ -24,7 +30,7 @@
           </select>
         </div>
       </div>
-      <div class="col-5">
+      <div class="col-12 col-md-5">
         <label class="form-label">Coins to Receive</label>
         <div class="input-group mb-3">
           <input
@@ -51,7 +57,7 @@
       </div>
     </div>
     <div class="row">
-      <button class="btn btn-primary mt-2" @click="buy()">Satın Al</button>
+      <button class="btn btn-primary mt-2" @click="buy()">Buy</button>
     </div>
   </div>
 </template>
@@ -59,8 +65,10 @@
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
+import { maska } from 'maska'
 
 export default {
+  directives: { maska },
   name: "Home",
   data() {
     return {
@@ -83,12 +91,12 @@ export default {
       })
         .then((response) => {
           this.currencies = response.data;
-          this.currency = response.data.USD.symbol;
+          this.currency = response.data["USD"]["symbol"];
         })
         .catch(() => {
           this.$buefy.toast.open({
             duration: 3000,
-            message: "Bir hata oluştu",
+            message: "Opps!",
             position: "is-bottom",
             type: "is-danger",
           });
@@ -110,34 +118,30 @@ export default {
     changeVal(type) {
       if (type === "coin") {
         if (this.coin == "") {
-          this.snackbar("Lütfen bir miktar giriniz");
           this.currencyval = null;
         } else if (this.coin == "0") {
-          this.snackbar("Lütfen doğru bir miktar giriniz");
-          this.currencyval = null;
-        } else if (this.coin < 30) {
-          this.snackbar("Lütfen doğru bir miktar giriniz");
+          this.snackbar("Please enter a correct amount");
           this.currencyval = null;
         }
       } else {
+        this.showalert = false;
         if (this.currencyval == "") {
-          this.snackbar("Lütfen bir miktar giriniz");
           this.coin = null;
           this.resetTimer();
         } else if (this.currencyval == "0") {
-          this.snackbar("Lütfen doğru bir miktar giriniz");
+          this.snackbar("Please enter a correct amount");
           this.coin = null;
           this.resetTimer();
         } else if (this.currencyval < 30 && this.currency == "USD") {
-          this.snackbar("Lütfen minimum 30 USD giriniz");
+          this.snackbar("Min amount is 30 for USD");
           this.coin = null;
           this.resetTimer();
         } else if (this.currencyval < 25 && this.currency == "EUR") {
-          this.snackbar("Lütfen minimum 25 EUR giriniz");
+          this.snackbar("Min amount is 25 for EUR");
           this.coin = null;
           this.resetTimer();
         } else if (this.currencyval < 20 && this.currency == "GBP") {
-          this.snackbar("Lütfen minimum 20 GBP giriniz");
+          this.snackbar("Min amount is 20 for GBP");
           this.coin = null;
           this.resetTimer();
         } else if (
@@ -146,7 +150,7 @@ export default {
             this.currency == "EUR" ||
             this.currency == "USD")
         ) {
-          this.snackbar(`Lütfen maximum 50000 ${this.currency} giriniz`);
+          this.snackbar(`Max limit is 50000 for ${this.currency}`);
           this.coin = null;
           this.resetTimer();
         } else {
@@ -165,12 +169,11 @@ export default {
       this.clearTimer = setInterval(function () {
         if (timeleft <= 0) {
           clearInterval(_that.clearTimer);
-          document.getElementById("countdown").innerHTML =
-            "Fiyat Yeniden Hesaplandı";
+          document.getElementById("countdown").innerHTML = "Price Recalculated";
           _that.calculate();
         } else {
           document.getElementById("countdown").innerHTML =
-          "Fiyatın yeniden hesaplanmasına "  + timeleft + " saniye kaldı";
+            timeleft + " seconds until the price recalculates";
         }
         timeleft -= 1;
       }, 1000);
@@ -189,7 +192,7 @@ export default {
         .catch(() => {
           this.$buefy.toast.open({
             duration: 3000,
-            message: "Bir hata oluştu",
+            message: "Opps!",
             position: "is-bottom",
             type: "is-danger",
           });

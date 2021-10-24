@@ -1,10 +1,11 @@
 <template>
   <div class="container d-flex align-items-center justify-content-center h-100">
     <div class="row">
-      <p class="title">İşleminizin detayları;</p>
+      <h2>Details of Your Transaction</h2>
     </div>
+    <br>
     <div class="row">
-      <p class="subtitle">
+      <p>
         {{ result }}
       </p>
     </div>
